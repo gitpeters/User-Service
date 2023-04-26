@@ -1,61 +1,45 @@
 package com.peters.user.and.notification.service.controller;
 
-import com.peters.user.and.notification.service.model.AppUser;
+import com.peters.user.and.notification.service.dto.UserRequestDto;
+import com.peters.user.and.notification.service.dto.UserResponseDto;
+import com.peters.user.and.notification.service.entity.AppUser;
 import com.peters.user.and.notification.service.service.AppUserService;
-import com.peters.user.and.notification.service.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
+@RequiredArgsConstructor
 public class AppUserController {
 
-    @Autowired
-    private AppUserService service;
-
-    @Autowired
-    private NotificationService notificationService;
+    private final AppUserService service;
 
     @GetMapping("/users")
-    public ResponseEntity<List<AppUser>> getAllUser(){
-        return new ResponseEntity<>(service.getAllUsers(), HttpStatus.OK);
+    public ResponseEntity<List<UserResponseDto>> getAllUser(){
+        return ResponseEntity.ok().body(service.getAllUsers());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Optional<AppUser>> getUserByUsername(@PathVariable("userId") Long userId){
-        Optional<AppUser> user = service.findUserById(userId);
-        if(user == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(user, HttpStatus.FOUND);
+    public ResponseEntity<ResponseEntity<UserResponseDto>> getUserById(@PathVariable("userId") Long userId){
+       return ResponseEntity.ok().body(service.findUserById(userId));
     }
 
     @PostMapping("/user/save")
-    public ResponseEntity<AppUser> saveUser(@Validated @RequestBody AppUser user) {
-        AppUser newUser;
-        if (service.isAppUserExist(user.getUsername(), user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } else {
-            newUser = service.saveUser(user);
-            notificationService.sendNotification(newUser);
-        }
-        return ResponseEntity.ok(newUser);
+    public ResponseEntity<?> saveUser(@Validated @RequestBody AppUser user) {
+        return service.saveUser(user);
     }
 
-    @PutMapping("/user/update/{userId}")
-    public ResponseEntity<AppUser> updateUser(@PathVariable("userId") Long userId, @RequestBody AppUser user){
-        return new ResponseEntity<>(service.updateUserInfo(userId, user), HttpStatus.OK);
+    @PatchMapping("/user/update/{userId}")
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable("userId") Long userId, @RequestBody UserRequestDto request){
+        return service.updateUserInfo(userId, request);
     }
 
     @DeleteMapping("/user/delete/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId){
-        service.deleteUser(userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(service.deleteUser(userId));
     }
 }

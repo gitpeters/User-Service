@@ -1,20 +1,21 @@
 package com.peters.user.and.notification.service.service;
 
-import com.peters.user.and.notification.service.model.AppUser;
+import com.peters.user.and.notification.service.dto.UserRequestDto;
+import com.peters.user.and.notification.service.dto.UserResponseDto;
+import com.peters.user.and.notification.service.entity.AppUser;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AppUserService {
 
-    List<AppUser> getAllUsers();
-    Optional<AppUser> findUserById(Long id);
+    List<UserResponseDto> getAllUsers();
+    ResponseEntity<UserResponseDto> findUserById(Long id);
 
-    AppUser saveUser(AppUser user);
+    ResponseEntity<UserResponseDto> saveUser(AppUser request);
 
-    AppUser findUserByUsername(String username);
-    AppUser updateUserInfo(Long id, AppUser user);
+    ResponseEntity<UserResponseDto> updateUserInfo(Long id, UserRequestDto request);
 
-    boolean isAppUserExist(String username, String user);
-    void deleteUser(Long id);
+    ResponseEntity<UserResponseDto> deleteUser(Long id);
 }
